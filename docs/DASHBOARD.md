@@ -24,8 +24,10 @@ page auto-refreshes every 20 seconds.
   interface unless `web.api_token` is set.
 * With a token set, nothing that exposes monitoring data is readable without it
   — `/api/*`, `/metrics` and the dashboard itself. Visiting `/` then shows a
-  sign-in page; submitting the token stores it in a `webmon_session` cookie
-  (HttpOnly, SameSite=Strict, Secure over HTTPS) for 12 hours.
+  sign-in page; submitting the token sets a `webmon_session` cookie (HttpOnly,
+  SameSite=Strict, Secure over HTTPS) for 12 hours. The cookie holds an HMAC
+  derived from the token rather than the token itself, so it cannot be replayed
+  against the JSON API; rotating the token invalidates every session.
 * The dashboard and API are read-only; there is no control surface to mutate
   monitoring state from the browser.
 * Still put a TLS-terminating reverse proxy in front before exposing it — the

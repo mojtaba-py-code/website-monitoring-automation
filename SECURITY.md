@@ -38,11 +38,12 @@ The controls below reflect that boundary.
 | SSRF via target or redirect URLs | `UrlGuard` validates scheme, host block/allow-lists and resolved IPs before every connection; the block-list also matches resolved addresses |
 | Open-redirect pivot to internal services | Redirects are followed **manually** and every hop is re-validated; `169.254.169.254` is block-listed by default |
 | Credential leakage across hosts | `Authorization` and `Cookie` headers are dropped on a cross-host redirect |
-| Secrets in logs | Secrets are referenced as `${ENV:VAR}`; `redact()` masks tokens, passwords, URL user-info and sensitive query parameters; failed alert deliveries log only a status code or exception type |
+| Secrets in logs | Secrets are referenced as `${ENV:VAR}`; `redact()` masks tokens, passwords, URL user-info and sensitive query parameters; `redact_headers()` matches on the header *name* so an operator-chosen `api_key_header` is masked too; failed alert deliveries log only a status code or exception type |
 | Memory exhaustion from hostile responses | Response bodies are read with a hard byte cap |
 | SMTP credential interception | The e-mail channel supplies its own SSL context (chain **and** hostname verified) and refuses to authenticate over an unencrypted session |
 | Unauthenticated exposure of monitoring data | `web.api_token` gates `/api/*`, `/metrics` and the dashboard; the server refuses a non-localhost bind without one |
 | Timing attacks on the API token | Compared with `secrets.compare_digest` |
+| A stolen dashboard cookie driving the API | The cookie carries an HMAC derived from the token, never the token; it is HttpOnly, SameSite=Strict, and Secure over HTTPS |
 | Command injection via the ICMP probe | `ping` is executed with a fixed argument vector (never a shell) and the host is validated against an option-injection allow-list |
 | SQL injection | All values are bound parameters; the few interpolated table names are checked against an allow-list |
 

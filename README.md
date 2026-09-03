@@ -154,8 +154,9 @@ injected (config + guard), so each probe is unit-testable in isolation. See
   context verifies neither), and credentials are never sent over cleartext.
 * **Read-only web API** — the dashboard never mutates state. When
   `web.api_token` is set it gates every data route — `/api/*`, `/metrics` and
-  the dashboard — compared in constant time; browsers exchange the token for an
-  HttpOnly, SameSite=Strict session cookie at `/login`. The server refuses to
+  the dashboard — compared in constant time; browsers exchange the token at
+  `/login` for an HttpOnly, SameSite=Strict cookie holding an HMAC *derived*
+  from it, so a stolen cookie cannot be replayed as an API credential. The server refuses to
   bind to a non-localhost interface unless a token is set.
 
 ---
@@ -218,7 +219,7 @@ pytest --cov              # tests + coverage
 ```
 
 Quality gates on every change: **ruff** clean (security rules included), **mypy**
-strict clean, **pytest** green (124 tests, ~84% coverage), and no real network in
+strict clean, **pytest** green (126 tests, ~84% coverage), and no real network in
 tests — HTTP is mocked with `respx`, and DNS/ICMP/TLS are monkeypatched. CI runs
 all three on Linux, Windows and macOS across Python 3.10–3.12, plus a package
 build, a Docker build, a `pip-audit` dependency scan and CodeQL analysis.

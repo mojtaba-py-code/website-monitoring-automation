@@ -13,7 +13,9 @@ the server is fronted by a reverse proxy. Tokens are compared in constant time.
 * API / metrics clients send ``Authorization: Bearer <token>``.
 * Browsers cannot set that header, so ``/`` accepts a ``webmon_session`` cookie
   instead; posting the token to ``/login`` sets it (HttpOnly, SameSite=Strict,
-  and Secure whenever the request arrived over HTTPS).
+  and Secure whenever the request arrived over HTTPS). The cookie carries an
+  HMAC *derived* from the token rather than the token itself, so a cookie
+  lifted from a browser profile cannot be replayed as an API bearer credential.
 
 ``/api/ping`` stays open on purpose: it is the container health-check and
 returns no monitoring data.
@@ -22,6 +24,8 @@ returns no monitoring data.
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -46,6 +50,9 @@ _STATIC_DIR = Path(__file__).parent / "static"
 
 _SESSION_COOKIE = "webmon_session"
 _SESSION_MAX_AGE = 12 * 3600  # seconds
+# Domain-separation label for the cookie HMAC. Bump the suffix to invalidate
+# every existing dashboard session without rotating the API token itself.
+_SESSION_LABEL = b"webmon-dashboard-session-v1"
 
 
 def _login_page(*, error: str = "") -> str:
@@ -139,6 +146,19 @@ def create_app(settings: Settings) -> FastAPI:
         if not (header.startswith(prefix) and _token_matches(header[len(prefix):])):
             raise HTTPException(status_code=401, detail="Invalid or missing API token.")
 
+    def _session_value() -> str:
+        """Opaque proof-of-token stored in the dashboard cookie.
+
+        Deliberately *not* the token: the same string also authenticates the
+        JSON API as a bearer credential, so putting it in a cookie would let a
+        cookie lifted from a browser profile drive the whole API. An HMAC over a
+        fixed label proves knowledge of the token without carrying it, and is
+        not reversible back to it.
+        """
+        return hmac.new(
+            settings.web.api_token.encode("utf-8"), _SESSION_LABEL, hashlib.sha256
+        ).hexdigest()
+
     def _browser_authorized(request: Request) -> bool:
         """True when the dashboard may be rendered for this request."""
         if not settings.web.api_token:
@@ -147,7 +167,8 @@ def create_app(settings: Settings) -> FastAPI:
         prefix = "Bearer "
         if header.startswith(prefix) and _token_matches(header[len(prefix):]):
             return True
-        return _token_matches(request.cookies.get(_SESSION_COOKIE, ""))
+        cookie = request.cookies.get(_SESSION_COOKIE, "")
+        return secrets.compare_digest(cookie.encode("utf-8", "ignore"), _session_value().encode())
 
     # -- dashboard --------------------------------------------------------- #
     @app.get("/", response_class=HTMLResponse)
@@ -184,10 +205,7 @@ def create_app(settings: Settings) -> FastAPI:
         response = RedirectResponse("/", status_code=303)
         response.set_cookie(
             _SESSION_COOKIE,
-            # The configured token, not the submitted string: the two are equal
-            # here (constant-time check above), but this keeps request input out
-            # of the Set-Cookie header entirely.
-            settings.web.api_token,
+            _session_value(),
             httponly=True,
             samesite="strict",
             secure=request.url.scheme == "https",

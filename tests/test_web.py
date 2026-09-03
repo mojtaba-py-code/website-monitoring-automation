@@ -91,6 +91,31 @@ def test_login_sets_session_cookie_and_unlocks_dashboard(settings: Settings) -> 
         assert client.get("/").status_code == 200
 
 
+def test_session_cookie_does_not_contain_the_token(settings: Settings) -> None:
+    """The cookie proves knowledge of the token without carrying it.
+
+    The token doubles as the API bearer credential, so a cookie lifted from a
+    browser profile must not be replayable against `/api/*`.
+    """
+    settings.web.api_token = "secret-token"
+    with _client(settings) as client:
+        posted = client.post("/login", data={"token": "secret-token"}, follow_redirects=False)
+        cookie = posted.cookies["webmon_session"]
+        assert "secret-token" not in cookie
+        # And the cookie value is useless as a bearer credential.
+        replay = client.get("/api/status", headers={"Authorization": f"Bearer {cookie}"})
+        assert replay.status_code == 401
+
+
+def test_session_cookie_is_rejected_after_the_token_changes(settings: Settings) -> None:
+    settings.web.api_token = "secret-token"
+    with _client(settings) as client:
+        client.post("/login", data={"token": "secret-token"}, follow_redirects=False)
+        assert client.get("/").status_code == 200
+        settings.web.api_token = "rotated-token"   # rotating invalidates sessions
+        assert client.get("/").status_code == 401
+
+
 def test_login_rejects_a_wrong_token(settings: Settings) -> None:
     settings.web.api_token = "secret-token"
     with _client(settings) as client:

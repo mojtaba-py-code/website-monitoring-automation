@@ -19,6 +19,11 @@ Browsers cannot set that header, so the dashboard at `/` also accepts a
 token for one (HttpOnly, SameSite=Strict, and Secure whenever the request
 arrived over HTTPS, so it is safe behind a TLS-terminating proxy).
 
+The cookie holds an HMAC **derived** from the token, not the token itself —
+the token doubles as the API bearer credential, so a cookie lifted from a
+browser profile grants a dashboard session but cannot drive `/api/*`. Rotating
+`web.api_token` invalidates every existing session.
+
 `/api/ping` is the only unauthenticated route — it is the container health
 probe and returns no monitoring data.
 

@@ -32,12 +32,13 @@ Initial public release.
 * **Dashboard, REST API and metrics** — a FastAPI live dashboard, a read-only
   JSON API, and a dependency-free Prometheus `/metrics` endpoint. When
   `web.api_token` is set it gates every data route; browsers exchange the token
-  for an HttpOnly, SameSite=Strict session cookie at `/login`. The server
-  refuses to bind to a non-localhost interface without a token.
+  at `/login` for an HttpOnly, SameSite=Strict cookie carrying an HMAC derived
+  from it, so a stolen cookie cannot be replayed as an API credential. The
+  server refuses to bind to a non-localhost interface without a token.
 * **Deployment** — multi-stage Dockerfile running as a non-root user, Compose
   stack, systemd unit and cron / Task Scheduler snippets.
 * **Quality gates** — ruff (including flake8-bandit security rules), mypy in
-  strict mode, and 124 tests at ~84% coverage, run on Linux, Windows and macOS
+  strict mode, and 126 tests at ~84% coverage, run on Linux, Windows and macOS
   across Python 3.10–3.12. No test touches the real network.
 
 [1.0.0]: https://github.com/mojtaba-py-code/website-monitoring-automation/releases/tag/v1.0.0
