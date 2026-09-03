@@ -37,7 +37,7 @@ Initial public release.
 * **Deployment** — multi-stage Dockerfile running as a non-root user, Compose
   stack, systemd unit and cron / Task Scheduler snippets.
 * **Quality gates** — ruff (including flake8-bandit security rules), mypy in
-  strict mode, and 116 tests at ~84% coverage, run on Linux, Windows and macOS
+  strict mode, and 124 tests at ~84% coverage, run on Linux, Windows and macOS
   across Python 3.10–3.12. No test touches the real network.
 
 [1.0.0]: https://github.com/mojtaba-py-code/website-monitoring-automation/releases/tag/v1.0.0

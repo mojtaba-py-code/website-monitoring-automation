@@ -7,6 +7,7 @@ off so the SSRF guard permits them without any DNS lookup.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -52,9 +53,6 @@ def ctx(settings: Settings) -> CheckContext:
 
 
 @pytest.fixture
-def service(settings: Settings) -> MonitorService:
-    svc = MonitorService(settings, configure_logs=False)
-    try:
+def service(settings: Settings) -> Iterator[MonitorService]:
+    with MonitorService(settings, configure_logs=False) as svc:
         yield svc
-    finally:
-        svc.close()

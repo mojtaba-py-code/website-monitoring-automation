@@ -184,7 +184,10 @@ def create_app(settings: Settings) -> FastAPI:
         response = RedirectResponse("/", status_code=303)
         response.set_cookie(
             _SESSION_COOKIE,
-            submitted,
+            # The configured token, not the submitted string: the two are equal
+            # here (constant-time check above), but this keeps request input out
+            # of the Set-Cookie header entirely.
+            settings.web.api_token,
             httponly=True,
             samesite="strict",
             secure=request.url.scheme == "https",

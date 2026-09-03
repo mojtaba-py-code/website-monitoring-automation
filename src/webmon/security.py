@@ -82,10 +82,33 @@ def redact_url(url: str) -> str:
     return urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, query, ""))
 
 
+_SENSITIVE_HEADERS = frozenset(
+    {"authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"}
+)
+# Substrings that mark a header as credential-bearing. A target's API-key header
+# name is operator-configurable (``auth.api_key_header``), so an exact-match list
+# alone would silently log a key sent under a custom name such as
+# ``X-Custom-Auth``. Over-masking a header in a log is harmless; under-masking
+# one leaks a secret, so the heuristic errs toward masking.
+_SENSITIVE_HEADER_PARTS = (
+    "auth",
+    "token",
+    "secret",
+    "password",
+    "credential",
+    "cookie",
+    "key",
+)
+
+
+def _is_sensitive_header(name: str) -> bool:
+    lowered = name.lower()
+    return lowered in _SENSITIVE_HEADERS or any(part in lowered for part in _SENSITIVE_HEADER_PARTS)
+
+
 def redact_headers(headers: dict[str, str]) -> dict[str, str]:
     """Return a copy of ``headers`` with credential-bearing values masked."""
-    sensitive = {"authorization", "cookie", "set-cookie", "x-api-key", "proxy-authorization"}
-    return {k: (_MASK if k.lower() in sensitive else v) for k, v in headers.items()}
+    return {k: (_MASK if _is_sensitive_header(k) else v) for k, v in headers.items()}
 
 
 # --------------------------------------------------------------------------- #

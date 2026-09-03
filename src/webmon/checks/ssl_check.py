@@ -26,6 +26,11 @@ from .base import CheckContext
 def _fetch_certificate(host: str, port: int, timeout: float) -> x509.Certificate:
     """Blocking TLS handshake returning the parsed leaf certificate."""
     context = ssl.create_default_context()
+    # create_default_context() already floors at TLS 1.2 on supported Pythons;
+    # stating it makes the guarantee explicit and immune to a future default
+    # change, and documents that a peer stuck on TLS 1.0/1.1 is reported as an
+    # error rather than quietly inspected.
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     with (
         socket.create_connection((host, port), timeout=timeout) as sock,
         context.wrap_socket(sock, server_hostname=host) as tls,

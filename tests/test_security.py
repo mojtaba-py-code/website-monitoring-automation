@@ -87,6 +87,41 @@ def test_redact_headers() -> None:
     assert masked["Accept"] == "json"
 
 
+@pytest.mark.parametrize(
+    "header",
+    [
+        "X-API-Key",           # the default api_key_header
+        "X-Custom-Auth",       # a custom name an operator might configure
+        "X-My-Token",
+        "X-Session-Secret",
+        "X-Account-Password",
+        "X-Service-Credential",
+        "x-lowercase-token",   # matching is case-insensitive
+    ],
+)
+def test_redact_headers_masks_custom_credential_headers(header: str) -> None:
+    """`auth.api_key_header` is operator-configurable, so an exact-match list is
+    not enough: any credential-looking header must be masked before logging."""
+    masked = redact_headers({header: "SUPERSECRET", "Accept": "json"})
+    assert masked[header] == "***", f"{header} leaked its value into the log"
+    assert masked["Accept"] == "json"  # ordinary headers stay readable
+
+
+def test_configured_api_key_header_is_redacted() -> None:
+    """End-to-end: a key sent under a custom header name never reaches a log."""
+    from webmon.checks.base import CheckContext
+    from webmon.config import Settings, Target
+
+    target = Target(
+        name="t",
+        url="https://example.test/",
+        auth={"type": "apikey", "api_key_header": "X-Custom-Auth", "api_key": "SUPERSECRET"},  # type: ignore[arg-type]
+    )
+    headers = CheckContext(Settings(), UrlGuard(SecurityConfig())).build_headers(target)
+    assert headers["X-Custom-Auth"] == "SUPERSECRET"          # really is sent
+    assert "SUPERSECRET" not in str(redact_headers(headers))  # but never logged
+
+
 def test_blocklist_matches_resolved_ip(monkeypatch: pytest.MonkeyPatch) -> None:
     """A hostname pointing at a block-listed IP must be refused.
 

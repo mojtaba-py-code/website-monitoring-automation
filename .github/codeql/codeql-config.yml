@@ -1,0 +1,14 @@
+name: "webmon CodeQL config"
+
+# Full security coverage plus the quality suite; the exclusions below are
+# documented false positives, not blanket silencing.
+queries:
+  - uses: security-and-quality
+
+query-filters:
+  # `...` is the idiomatic body of a typing.Protocol method and of the no-op
+  # NullDatabase implementation. CodeQL reports each one as an expression
+  # statement with no effect, which is true and intended -- writing `pass`
+  # instead would only trade an idiom for noise.
+  - exclude:
+      id: py/ineffectual-statement
