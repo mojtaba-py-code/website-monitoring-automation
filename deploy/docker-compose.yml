@@ -1,0 +1,31 @@
+# Website Monitoring Automation — two services from one image sharing history.
+# Secrets come from an .env file (never baked into the image). See DEPLOYMENT.md.
+services:
+  monitor:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: webmon:latest
+    command: ["run"]
+    env_file: [.env]
+    volumes:
+      - webmon-data:/data
+      - ../config:/app/config:ro
+    restart: unless-stopped
+
+  dashboard:
+    image: webmon:latest
+    depends_on: [monitor]
+    # Binds to 0.0.0.0 inside the container, so WEBMON_API_TOKEN must be set in
+    # .env -- the server refuses a non-local bind without a token.
+    command: ["dashboard", "--host", "0.0.0.0"]
+    env_file: [.env]
+    ports:
+      - "127.0.0.1:8899:8899"   # bind to localhost; front with a reverse proxy
+    volumes:
+      - webmon-data:/data
+      - ../config:/app/config:ro
+    restart: unless-stopped
+
+volumes:
+  webmon-data:

@@ -1,0 +1,53 @@
+name: Bug report
+description: Something is not working as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Do not report security vulnerabilities here** —
+        follow [SECURITY.md](../../blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The command you ran and a minimal config. **Redact every secret.**
+      placeholder: |
+        1. webmon check ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output / logs
+      description: Run with `--verbose`. Paste the relevant part, redacted.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "webmon --version, or a commit SHA"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Linux, Windows, macOS, Docker, Other]
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.5"
+    validations:
+      required: true

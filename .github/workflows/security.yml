@@ -1,0 +1,52 @@
+name: Security
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # Weekly, so a CVE published against a pinned dependency surfaces even when
+    # nothing has been pushed.
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Dependency audit (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pip-audit
+        run: python -m pip install --upgrade pip pip-audit
+      # Audits the declared dependency set rather than the environment: the
+      # project itself is not on PyPI, which --strict would otherwise treat as
+      # an un-auditable dependency and fail on.
+      - name: Audit dependencies for known vulnerabilities
+        run: pip-audit --strict --requirement requirements.txt --progress-spinner=off
+
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          queries: security-and-quality
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3

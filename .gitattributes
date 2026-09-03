@@ -1,0 +1,38 @@
+# Normalise line endings in the repository regardless of each contributor's
+# core.autocrlf setting. Everything text is stored as LF; Windows checkouts get
+# native endings via autocrlf, and the files below that must stay LF are pinned.
+* text=auto
+
+# Files consumed by Linux tooling must never gain CRLF, even on Windows.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+
+# Python, docs and data: normalised, native in the working tree.
+*.py            text diff=python
+*.md            text diff=markdown
+*.toml          text
+*.cfg           text
+*.txt           text
+*.html          text
+*.json          text
+*.sql           text
+
+# Binary — never touch, never diff as text.
+*.png           binary
+*.jpg           binary
+*.ico           binary
+*.pdf           binary
+*.db            binary
+*.whl           binary
+
+# Keep docs and sample output out of GitHub's language statistics, so the
+# repository is reported as the Python project it is.
+docs/**         linguist-documentation
+examples/**     linguist-documentation
+
+# Repository furniture that does not belong in a `git archive` source tarball.
+.github/        export-ignore
+.gitattributes  export-ignore
+.gitignore      export-ignore

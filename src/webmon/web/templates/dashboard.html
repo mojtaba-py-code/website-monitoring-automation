@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website Monitoring Dashboard</title>
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+           background: #0d1117; color: #e6edf3; }
+    header { padding: 18px 26px; background: #161b22; border-bottom: 1px solid #30363d;
+             display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    header h1 { font-size: 17px; margin: 0; }
+    header .env { font-size: 12px; color: #8b949e; }
+    header .refresh { margin-left: auto; font-size: 12px; color: #8b949e; }
+    main { max-width: 1080px; margin: 22px auto; padding: 0 16px; }
+    .cards { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+            padding: 14px 18px; flex: 1; min-width: 140px; }
+    .card .n { font-size: 30px; font-weight: 700; } .card .l { font-size: 12px; color: #8b949e; }
+    table { width: 100%; border-collapse: collapse; background: #161b22;
+            border: 1px solid #30363d; border-radius: 10px; overflow: hidden; font-size: 13px; }
+    th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #21262d; }
+    th { color: #8b949e; font-weight: 600; }
+    .pill { color: #fff; padding: 1px 9px; border-radius: 20px; font-size: 11px; text-transform: uppercase; }
+    .up { background: #238636; } .warning { background: #9e6a03; } .degraded { background: #bc4c00; }
+    .down { background: #da3633; } .unknown { background: #484f58; }
+    h2 { font-size: 14px; margin: 22px 0 8px; color: #8b949e; text-transform: uppercase; letter-spacing: .04em; }
+    ul { font-size: 13px; padding-left: 18px; } code { color: #79c0ff; }
+    a { color: #58a6ff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌐 Website Monitoring</h1>
+    <span class="env">{{ environment }}</span>
+    <span class="refresh">auto-refresh 20s</span>
+  </header>
+  <main>
+    <div class="cards">
+      <div class="card"><div class="n">{{ summary.total }}</div><div class="l">Targets</div></div>
+      <div class="card"><div class="n" style="color:#3fb950">{{ summary.up }}</div><div class="l">Up</div></div>
+      <div class="card"><div class="n" style="color:#f85149">{{ summary.total - summary.up }}</div><div class="l">Down / degraded</div></div>
+    </div>
+
+    <table>
+      <tr><th>Target</th><th>Status</th><th>URL</th><th>Resp (ms)</th><th>Avail 24h</th><th>Checks</th></tr>
+      {% for t in targets %}
+      <tr>
+        <td><b>{{ t.target }}</b></td>
+        <td><span class="pill {{ t.status }}">{{ t.status }}</span></td>
+        <td><a href="{{ t.url }}" rel="noreferrer noopener">{{ t.url }}</a></td>
+        <td>{{ '%.0f'|format(t.response_time_ms) if t.response_time_ms is not none else '—' }}</td>
+        <td>{{ t.availability.availability_pct if t.availability.availability_pct is not none else '—' }}%</td>
+        <td>{% for c in t.checks %}<code>{{ c.kind }}:{{ c.status }}</code> {% endfor %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Waiting for the first monitoring cycle…</td></tr>
+      {% endfor %}
+    </table>
+
+    <h2>Recent status changes</h2>
+    <ul>
+      {% for e in events %}
+      <li><code>{{ e.ts }}</code> — <b>{{ e.target }}</b>: {{ e.from_status }} → {{ e.to_status }}</li>
+      {% else %}<li>None recorded yet.</li>{% endfor %}
+    </ul>
+
+    <h2>Recent alerts</h2>
+    <ul>
+      {% for a in alerts %}
+      <li><code>{{ a.ts }}</code> — [{{ a.severity }}] <b>{{ a.target }}</b>: {{ a.title }}</li>
+      {% else %}<li>No alerts.</li>{% endfor %}
+    </ul>
+  </main>
+  <script>setTimeout(() => location.reload(), 20000);</script>
+</body>
+</html>

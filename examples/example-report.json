@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "generated_at": "2026-08-04T20:56:16+00:00",
+    "environment": "monitoring"
+  },
+  "summary": {
+    "total": 2,
+    "up": 1,
+    "down": 1,
+    "health_pct": 50.0
+  },
+  "targets": [
+    {
+      "name": "Example Website",
+      "url": "https://example.com",
+      "status": "up",
+      "response_time_ms": 1306.29,
+      "availability_24h": 100.0,
+      "avg_ms": 1306.3,
+      "max_ms": 1306.3,
+      "min_ms": 1306.3,
+      "failures_24h": 0,
+      "checks": [
+        {
+          "target": "Example Website",
+          "kind": "http",
+          "status": "up",
+          "latency_ms": 1306.29,
+          "message": "HTTP 200 in 1306ms",
+          "timestamp": "2026-08-04T20:56:16+00:00",
+          "details": {
+            "status_code": 200,
+            "response_time_ms": 1306.29,
+            "response_bytes": 559,
+            "truncated": false,
+            "redirects": 0,
+            "final_url_changed": false,
+            "server": "cloudflare",
+            "security_headers": {
+              "strict-transport-security": false,
+              "content-security-policy": false,
+              "x-content-type-options": false,
+              "x-frame-options": false,
+              "referrer-policy": false
+            }
+          },
+          "ok": true
+        },
+        {
+          "target": "Example Website",
+          "kind": "ssl",
+          "status": "up",
+          "latency_ms": null,
+          "message": "Valid for 84 more day(s)",
+          "timestamp": "2026-08-04T20:56:15+00:00",
+          "details": {
+            "issuer": "CN=Cloudflare TLS Issuing ECC CA 3,O=SSL Corporation,C=US",
+            "subject": "CN=example.com",
+            "not_before": "2026-07-29T22:10:08+00:00",
+            "not_after": "2026-10-27T22:17:21+00:00",
+            "days_until_expiry": 84.1,
+            "serial": "624d0ab311558780b7d5213b9631831"
+          },
+          "ok": true
+        },
+        {
+          "target": "Example Website",
+          "kind": "dns",
+          "status": "up",
+          "latency_ms": null,
+          "message": "Resolved 2 record(s) across 1 type(s)",
+          "timestamp": "2026-08-04T20:56:15+00:00",
+          "details": {
+            "records": {
+              "A": [
+                "104.20.23.154",
+                "172.66.147.243"
+              ]
+            },
+            "fingerprint": "A=104.20.23.154,172.66.147.243",
+            "host": "example.com"
+          },
+          "ok": true
+        }
+      ]
+    },
+    {
+      "name": "Missing Service",
+      "url": "https://service-does-not-exist-demo.invalid/health",
+      "status": "down",
+      "response_time_ms": null,
+      "availability_24h": 0.0,
+      "avg_ms": null,
+      "max_ms": null,
+      "min_ms": null,
+      "failures_24h": 1,
+      "checks": [
+        {
+          "target": "Missing Service",
+          "kind": "http",
+          "status": "down",
+          "latency_ms": null,
+          "message": "DNS resolution failed for service-does-not-exist-demo.invalid: [Errno 11001] getaddrinfo failed",
+          "timestamp": "2026-08-04T20:56:15+00:00",
+          "details": {
+            "redirects": 0
+          },
+          "ok": false
+        }
+      ]
+    }
+  ],
+  "recent_events": [
+    {
+      "id": 2,
+      "target": "Example Website",
+      "from_status": null,
+      "to_status": "up",
+      "message": "http:up, ssl:up, dns:up",
+      "ts": "2026-08-04T20:56:16+00:00"
+    },
+    {
+      "id": 1,
+      "target": "Missing Service",
+      "from_status": null,
+      "to_status": "down",
+      "message": "http:down",
+      "ts": "2026-08-04T20:56:15+00:00"
+    }
+  ],
+  "recent_alerts": []
+}

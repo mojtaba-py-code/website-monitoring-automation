@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website Monitoring Report</title>
+<style>
+ :root { color-scheme: light dark; }
+ body { font-family: system-ui,-apple-system,Segoe UI,sans-serif; margin:0; background:#f6f8fa; color:#1f2328; }
+ header { background:#24292f; color:#fff; padding:22px 28px; }
+ header h1 { margin:0; font-size:19px; } header p { margin:4px 0 0; opacity:.8; font-size:13px; }
+ main { max-width:1000px; margin:22px auto; padding:0 16px; }
+ .cards { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+ .card { background:#fff; border:1px solid #d0d7de; border-radius:10px; padding:14px 18px; flex:1; min-width:150px; }
+ .card .n { font-size:30px; font-weight:700; } .card .l { font-size:12px; color:#57606a; }
+ table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #d0d7de;
+          border-radius:8px; overflow:hidden; font-size:13px; }
+ th,td { text-align:left; padding:8px 10px; border-bottom:1px solid #eaeef2; } th { color:#57606a; }
+ .pill { color:#fff; padding:1px 8px; border-radius:20px; font-size:11px; text-transform:uppercase; }
+ h2 { font-size:15px; margin:22px 0 8px; } ul { font-size:13px; }
+ @media (prefers-color-scheme: dark) {
+   body { background:#0d1117; color:#e6edf3; } .card,table { background:#161b22; border-color:#30363d; }
+   th,td { border-color:#21262d; } .card .l { color:#8b949e; }
+ }
+</style></head><body>
+<header><h1>🌐 Website Monitoring Report</h1>
+<p>2026-08-04T20:56:16+00:00 · monitoring</p></header>
+<main>
+ <div class="cards">
+   <div class="card"><div class="n">2</div><div class="l">Targets</div></div>
+   <div class="card"><div class="n" style="color:#1a7f37">1</div><div class="l">Up</div></div>
+   <div class="card"><div class="n" style="color:#cf222e">1</div><div class="l">Down</div></div>
+   <div class="card"><div class="n">50.0%</div><div class="l">Health</div></div>
+ </div>
+ <table><tr><th>Target</th><th>Status</th><th>URL</th><th>Resp (ms)</th><th>Avail 24h</th><th>Fail 24h</th></tr>
+ <tr><td>Example Website</td><td><span class='pill' style='background:#1a7f37'>up</span></td><td>https://example.com</td><td>1306</td><td>100.0%</td><td>0</td></tr><tr><td>Missing Service</td><td><span class='pill' style='background:#cf222e'>down</span></td><td>https://service-does-not-exist-demo.invalid/health</td><td>—</td><td>0.0%</td><td>1</td></tr></table>
+ <h2>Recent status changes</h2>
+ <ul><li>2026-08-04T20:56:16+00:00 — <b>Example Website</b>: None → up</li><li>2026-08-04T20:56:15+00:00 — <b>Missing Service</b>: None → down</li></ul>
+</main></body></html>

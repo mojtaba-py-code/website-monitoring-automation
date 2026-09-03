@@ -1,0 +1,191 @@
+# =============================================================================
+# Website Monitoring Automation — Example Configuration
+# -----------------------------------------------------------------------------
+# Copy to `config/config.yaml` and edit. `config/config.yaml` is git-ignored so
+# your targets and (env-referenced) secrets stay private.
+#
+# SECRETS: never hard-code tokens here. Use the `${ENV:VAR}` syntax; the value
+# is read from the environment at load time and is never written to logs.
+# =============================================================================
+
+app:
+  environment: "production"
+  data_dir: "."
+
+# -----------------------------------------------------------------------------
+# Global defaults — applied to every target unless the target overrides them.
+# -----------------------------------------------------------------------------
+defaults:
+  interval_seconds: 60          # how often to check each target
+  timeout_seconds: 10           # per-request timeout
+  retries: 2                    # extra attempts on failure (exponential backoff)
+  retry_backoff_seconds: 0.5
+  verify_ssl: true              # validate TLS certificates on HTTP checks
+  follow_redirects: true
+  max_redirects: 5
+  max_response_bytes: 5242880   # 5 MiB cap (protects against huge responses)
+  ssl_warning_days: 21          # warn when a cert expires within N days
+  domain_warning_days: 30       # warn when a domain expires within N days
+  max_response_time_ms: 3000    # "slow" threshold
+  user_agent: "WebsiteMonitoringAutomation/1.0 (+https://github.com/mojtaba-py-code)"
+  dns_servers: []               # e.g. ["1.1.1.1", "8.8.8.8"]; empty = system
+
+# -----------------------------------------------------------------------------
+# Concurrency
+# -----------------------------------------------------------------------------
+performance:
+  max_concurrency: 20           # max simultaneous checks (async semaphore)
+  connect_timeout_seconds: 5
+
+# -----------------------------------------------------------------------------
+# Security — the guardrails around outbound requests (SSRF defence, etc.)
+# -----------------------------------------------------------------------------
+security:
+  allowed_schemes: ["http", "https"]
+  # Refuse to connect to private / loopback / link-local / reserved IPs. Keep
+  # TRUE for internet monitoring; set FALSE only to intentionally monitor an
+  # internal network you own.
+  block_private_networks: true
+  # Re-validate every redirect hop against the same rules (anti-SSRF).
+  validate_redirects: true
+  # Hosts explicitly allowed even when block_private_networks is true.
+  allowlist_hosts: []
+  # Hosts to always refuse (takes precedence over the allow-list).
+  blocklist_hosts: ["169.254.169.254"]   # cloud metadata endpoint
+
+# -----------------------------------------------------------------------------
+# Monitoring targets
+# -----------------------------------------------------------------------------
+targets:
+  - name: "Example Website"
+    url: "https://example.com"
+    enabled: true
+    # Which checks to run for this target. Any of:
+    #   http, ssl, dns, ping, port, content, api
+    checks: ["http", "ssl", "dns", "content"]
+    expected_status: [200]
+    expected_keywords: ["Example Domain"]     # all must be present
+    forbidden_keywords: []                    # none may be present
+    content_hash_check: true                  # alert if body checksum changes
+    dns_record_types: ["A", "AAAA"]
+    ports: [443, 80]
+    # Per-target overrides (optional):
+    # interval_seconds: 30
+    # timeout_seconds: 5
+    # max_response_time_ms: 1500
+    headers: {}
+    auth:
+      type: "none"                            # none | basic | bearer | apikey
+      # username: "${ENV:SITE_USER}"
+      # password: "${ENV:SITE_PASS}"
+      # token: "${ENV:SITE_TOKEN}"
+      # api_key_header: "X-API-Key"
+      # api_key: "${ENV:SITE_APIKEY}"
+
+  - name: "Example API"
+    url: "https://api.example.com/health"
+    enabled: true
+    checks: ["api", "ssl"]
+    expected_status: [200]
+    # For 'api' checks: validate the JSON body.
+    json_path_checks:
+      - path: "status"          # dotted path into the JSON
+        equals: "ok"
+    max_response_time_ms: 1500
+
+  - name: "Local Service (disabled example)"
+    url: "http://127.0.0.1:8080/health"
+    enabled: false
+    checks: ["http", "port"]
+    ports: [8080]
+
+# -----------------------------------------------------------------------------
+# Alerting — all channels disabled by default.
+# -----------------------------------------------------------------------------
+alerting:
+  enabled: false
+  # Fire an alert only after this many consecutive failures (anti-flapping).
+  failure_threshold: 2
+  # Emit a recovery alert when a target comes back up.
+  notify_on_recovery: true
+  # Re-send an ongoing alert at most this often (seconds); 0 = only on change.
+  renotify_seconds: 3600
+  channels:
+    email:
+      enabled: false
+      smtp_host: "${ENV:SMTP_HOST}"
+      smtp_port: 587
+      # use_tls: STARTTLS on a plain connection (port 587/25).
+      # use_ssl: implicit TLS from the first byte (port 465) - set smtp_port: 465.
+      # Either way the certificate chain AND hostname are verified, and
+      # credentials are never sent over an unencrypted session.
+      use_tls: true
+      use_ssl: false
+      username: "${ENV:SMTP_USERNAME}"
+      password: "${ENV:SMTP_PASSWORD}"
+      from_addr: "${ENV:SMTP_FROM}"
+      to_addrs: []
+    telegram:
+      enabled: false
+      bot_token: "${ENV:TELEGRAM_BOT_TOKEN}"
+      chat_id: "${ENV:TELEGRAM_CHAT_ID}"
+    slack:
+      enabled: false
+      webhook_url: "${ENV:SLACK_WEBHOOK_URL}"
+    discord:
+      enabled: false
+      webhook_url: "${ENV:DISCORD_WEBHOOK_URL}"
+    webhook:
+      enabled: false
+      url: "${ENV:GENERIC_WEBHOOK_URL}"
+      # Optional signing secret; requests include an HMAC-SHA256 signature.
+      secret: "${ENV:WEBHOOK_SECRET}"
+
+# -----------------------------------------------------------------------------
+# Database (SQLite)
+# -----------------------------------------------------------------------------
+database:
+  enabled: true
+  path: "database/webmon.db"
+  # Delete history rows older than this many days (0 = keep forever).
+  retention_days: 90
+
+# -----------------------------------------------------------------------------
+# Logging
+# -----------------------------------------------------------------------------
+logging:
+  level: "INFO"
+  console: true
+  directory: "logs"
+  rotate_max_bytes: 5242880
+  rotate_backup_count: 7
+  date_stamped_files: true
+  audit_log: true
+
+# -----------------------------------------------------------------------------
+# Reporting
+# -----------------------------------------------------------------------------
+report:
+  formats: ["html", "json"]     # html | json | csv | markdown | pdf
+  directory: "reports"
+  export_directory: "exports"
+
+# -----------------------------------------------------------------------------
+# Web dashboard / REST API
+# -----------------------------------------------------------------------------
+web:
+  host: "127.0.0.1"
+  port: 8899
+  # When set, the token gates EVERY data route: /api/*, /metrics and the HTML
+  # dashboard. Browsers exchange it for a session cookie at /login. Leaving it
+  # empty is only safe while bound to localhost - the server refuses to bind
+  # anywhere else without one.
+  api_token: "${ENV:WEBMON_API_TOKEN}"
+  enable_metrics: true                    # expose Prometheus /metrics
+
+# -----------------------------------------------------------------------------
+# Scheduler
+# -----------------------------------------------------------------------------
+scheduler:
+  # Run continuously, checking each target on its own interval.
+  enabled: true

@@ -1,0 +1,14 @@
+app: { environment: monitoring }
+logging: { console: false }
+defaults: { timeout_seconds: 8, retries: 1 }
+report: { formats: ["html", "json", "markdown"] }
+targets:
+  - name: "Example Website"
+    url: "https://example.com"
+    checks: ["http", "ssl", "dns"]
+    expected_status: [200]
+    expected_keywords: ["Example Domain"]
+  - name: "Missing Service"
+    url: "https://service-does-not-exist-demo.invalid/health"
+    checks: ["http"]
+    expected_status: [200]
