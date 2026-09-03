@@ -22,16 +22,16 @@ jobs:
     name: Dependency audit (pip-audit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
           cache: pip
       - name: Install pip-audit
         run: python -m pip install --upgrade pip pip-audit
-      # Audits the declared dependency set rather than the environment: the
-      # project itself is not on PyPI, which --strict would otherwise treat as
-      # an un-auditable dependency and fail on.
+      # Audits the declared dependency set rather than the installed
+      # environment, so the result depends only on what this project pins --
+      # not on whatever else happens to be in the runner's site-packages.
       - name: Audit dependencies for known vulnerabilities
         run: pip-audit --strict --requirement requirements.txt --progress-spinner=off
 
@@ -42,11 +42,11 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
         with:
           languages: python
           config-file: ./.github/codeql/codeql-config.yml
       - name: Analyze
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4

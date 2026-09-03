@@ -89,6 +89,8 @@ omit = ["*/web/*", "*/alerting/channels.py", "*/metrics.py", "*/__main__.py"]
 
 [tool.coverage.report]
 show_missing = true
+# Fail the build if coverage regresses. Current: ~84%.
+fail_under = 80
 exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",
