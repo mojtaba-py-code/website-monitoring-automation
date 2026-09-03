@@ -11,6 +11,8 @@ per-hop redirect validation), and secrets never touch the logs.
 
 [![CI](https://github.com/mojtaba-py-code/website-monitoring-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/mojtaba-py-code/website-monitoring-automation/actions/workflows/ci.yml)
 [![Security](https://github.com/mojtaba-py-code/website-monitoring-automation/actions/workflows/security.yml/badge.svg)](https://github.com/mojtaba-py-code/website-monitoring-automation/actions/workflows/security.yml)
+[![PyPI](https://img.shields.io/pypi/v/website-monitoring-automation)](https://pypi.org/project/website-monitoring-automation/)
+[![Downloads](https://img.shields.io/pypi/dm/website-monitoring-automation)](https://pypi.org/project/website-monitoring-automation/)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Coverage](https://img.shields.io/badge/coverage-84%25-brightgreen)
@@ -43,6 +45,20 @@ per-hop redirect validation), and secrets never touch the logs.
 Requires **Python 3.10+**.
 
 ```bash
+pip install website-monitoring-automation
+```
+
+That installs the `webmon` command (and `python -m webmon`). Optional extras:
+
+```bash
+pip install "website-monitoring-automation[web]"   # live dashboard + REST API
+pip install "website-monitoring-automation[pdf]"   # PDF reports
+```
+
+<details>
+<summary>From source (for development)</summary>
+
+```bash
 git clone https://github.com/mojtaba-py-code/website-monitoring-automation.git
 cd website-monitoring-automation
 
@@ -50,11 +66,10 @@ python -m venv .venv
 # Windows:  .venv\Scripts\activate
 # Linux/mac: source .venv/bin/activate
 
-pip install -e .                 # core
-pip install -e ".[web,pdf,dev]"  # + dashboard, PDF reports, dev tools
+pip install -e ".[web,pdf,dev]"
 ```
 
-This installs the `webmon` command (and `python -m webmon`).
+</details>
 
 ---
 
