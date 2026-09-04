@@ -167,6 +167,8 @@ injected (config + guard), so each probe is unit-testable in isolation. See
 * **Verified SMTP TLS** — the e-mail channel passes its own SSL context, so the
   certificate chain *and* hostname are checked (`smtplib`'s default STARTTLS
   context verifies neither), and credentials are never sent over cleartext.
+  Written up in detail, with a runnable proof:
+  [Python's smtplib doesn't verify TLS certificates by default](https://dev.to/mojtaba_pycode/pythons-smtplib-doesnt-verify-tls-certificates-by-default-1bla).
 * **Read-only web API** — the dashboard never mutates state. When
   `web.api_token` is set it gates every data route — `/api/*`, `/metrics` and
   the dashboard — compared in constant time; browsers exchange the token at
