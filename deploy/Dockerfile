@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # --- build stage -------------------------------------------------------------
-FROM python:3.12-slim AS build
+FROM python:3.14-slim AS build
 
 WORKDIR /app
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -11,7 +11,7 @@ COPY src ./src
 RUN pip install --prefix=/install ".[web,pdf]"
 
 # --- runtime stage -----------------------------------------------------------
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 # Unbuffered so log lines reach `docker logs` as they happen rather than in
 # blocks; no .pyc files, since the layer is read-only anyway.
