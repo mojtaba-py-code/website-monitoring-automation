@@ -8,7 +8,7 @@ on:
   schedule:
     # Weekly, so a CVE published against a pinned dependency surfaces even when
     # nothing has been pushed.
-    - cron: "0 6 * * 1"
+    - cron: "39 6 * * 1"
 
 permissions:
   contents: read
