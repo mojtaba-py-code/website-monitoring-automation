@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import httpx
@@ -84,3 +85,14 @@ def test_bad_config_returns_one(tmp_path: Path) -> None:
     bad = tmp_path / "bad.yaml"
     bad.write_text("defaults:\n  timeout_seconds: -1\n", encoding="utf-8")
     assert main(["--config", str(bad), "--silent", "list"]) == 1
+
+
+def test_dashboard_without_web_extra_names_the_extra(
+    cli_config: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # None in sys.modules makes the import fail exactly as a missing fastapi would.
+    monkeypatch.setitem(sys.modules, "webmon.web.server", None)
+    assert main([*_base(cli_config, tmp_path), "dashboard"]) == 1
+    # rich wraps at the terminal width, so compare with whitespace collapsed.
+    out = " ".join(capsys.readouterr().out.split())
+    assert 'pip install -e ".[web]"' in out
