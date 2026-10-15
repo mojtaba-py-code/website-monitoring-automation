@@ -16,6 +16,11 @@ python -m venv .venv
 pip install -e ".[dev,web,pdf]"
 ```
 
+Install all three extras, as CI does. Without `web` (FastAPI, uvicorn, Jinja2),
+`tests/test_web.py` is skipped as a whole — pytest still passes, with a single
+`SKIPPED` line in the summary — so a dashboard or REST API regression goes
+unnoticed until CI.
+
 Use a virtual environment. Running `mypy` against a global site-packages
 directory can surface errors from unrelated third-party stubs.
 
@@ -23,7 +28,7 @@ directory can surface errors from unrelated third-party stubs.
 
 Every change must pass all three locally before you open a pull request — CI
 runs exactly the same commands on Linux, Windows and macOS across Python
-3.10–3.12:
+3.10–3.14:
 
 ```bash
 ruff check src tests      # lint, incl. flake8-bandit security rules
