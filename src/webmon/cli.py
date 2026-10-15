@@ -33,6 +33,7 @@ _enable_utf8_console()
 
 try:
     from rich.console import Console
+    from rich.markup import escape
     from rich.table import Table
 
     _console: Console | None = Console()
@@ -57,7 +58,10 @@ def _print(message: str = "", *, style: str | None = None) -> None:
 
 def _error(message: str) -> None:
     if _console is not None:
-        _console.print(f"[bold red]error:[/] {message}")
+        # The message is plain text (often an exception string), not markup: unescaped,
+        # rich would swallow anything that looks like a tag, e.g. the "[web]" in
+        # 'pip install -e ".[web]"'.
+        _console.print(f"[bold red]error:[/] {escape(message)}")
     else:  # pragma: no cover
         print(f"error: {message}", file=sys.stderr)
 

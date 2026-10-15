@@ -91,5 +91,5 @@ secrets) — log a status code / error type only.
 2. Add the release section to [`CHANGELOG.md`](../CHANGELOG.md).
 3. Tag (`git tag -a v1.0.0 -m "v1.0.0"`) and push the tag.
 
-CI runs the full matrix on Windows/Linux/macOS × Python 3.10–3.12, plus the
+CI runs the full matrix on Windows/Linux/macOS × Python 3.10–3.14, plus the
 package, Docker and security jobs.

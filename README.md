@@ -236,9 +236,9 @@ pytest --cov              # tests + coverage
 ```
 
 Quality gates on every change: **ruff** clean (security rules included), **mypy**
-strict clean, **pytest** green (126 tests, ~84% coverage), and no real network in
+strict clean, **pytest** green (127 tests, ~84% coverage), and no real network in
 tests — HTTP is mocked with `respx`, and DNS/ICMP/TLS are monkeypatched. CI runs
-all three on Linux, Windows and macOS across Python 3.10–3.12, plus a package
+all three on Linux, Windows and macOS across Python 3.10–3.14, plus a package
 build, a Docker build, a `pip-audit` dependency scan and CodeQL analysis.
 
 Use a virtual environment: running `mypy` against a global site-packages
